@@ -1,0 +1,24 @@
+# --- secrets / env ---
+.env
+.env.*.local
+
+# --- python ---
+.venv/
+venv/
+
+# sqlite
+*.db
+*.sqlite
+
+# --- node / next ---
+node_modules/
+.next/
+out/
+dist/
+
+# logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
