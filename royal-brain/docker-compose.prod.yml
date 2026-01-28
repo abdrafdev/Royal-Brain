@@ -1,0 +1,80 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-royal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brain}
+      POSTGRES_DB: ${POSTGRES_DB:-royalbrain}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-royal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Explicit 12-factor configuration (no repo-root env files required)
+      RB_ENV: production
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://royal:brain@db:5432/royalbrain}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in your environment}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+
+      # Optional first-run authority bootstrap
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+
+      # Optional AI + blockchain anchoring
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      EVM_RPC_URL: ${EVM_RPC_URL:-}
+      EVM_CHAIN_ID: ${EVM_CHAIN_ID:-}
+      EVM_PRIVATE_KEY: ${EVM_PRIVATE_KEY:-}
+      EVM_EXPLORER_TX_URL_BASE: ${EVM_EXPLORER_TX_URL_BASE:-}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Only used for build-time public env; server-side uses BACKEND_URL.
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      RB_ENV: production
+      # Used by server-side fetches + API proxy
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:

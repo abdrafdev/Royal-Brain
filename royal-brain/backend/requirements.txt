@@ -7,6 +7,9 @@ email-validator
 python-jose[cryptography]
 argon2-cffi
 python-multipart
+openai
+web3
+psycopg[binary]
 
 # testing
 pytest

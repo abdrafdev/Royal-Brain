@@ -21,3 +21,8 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: Role
+
+
+class UserUpdate(BaseModel):
+    role: Role | None = None
+    is_active: bool | None = None

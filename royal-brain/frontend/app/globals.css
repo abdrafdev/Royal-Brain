@@ -1,0 +1,161 @@
+:root {
+  /* Ensure native form controls (especially <select>) render with dark UI on Windows/Chromium.
+     Without this, the dropdown menu can be white while our text is light, making options unreadable. */
+  color-scheme: dark;
+
+  --bg: #0b1220;
+  --bg-grid: rgba(255, 255, 255, 0.03);
+  --panel: rgba(15, 22, 35, 0.9);
+  --panel-soft: rgba(18, 26, 43, 0.92);
+  --border: rgba(255, 194, 102, 0.16);
+  --border-strong: rgba(255, 194, 102, 0.36);
+  --text: #e9edf7;
+  --muted: #9aa6c3;
+  --accent: #f6c344;
+  --accent-strong: #e89f18;
+  --success: #21d3a2;
+  --warning: #f2b94b;
+  --error: #f86c6a;
+  --info: #69b8ff;
+  --shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  --radius: 14px;
+  --font: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(180deg, var(--bg-grid) 1px, transparent 1px),
+    radial-gradient(circle at 20% 20%, rgba(255, 199, 102, 0.08), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(105, 184, 255, 0.08), transparent 26%);
+  background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%;
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Native form controls: improve readability of OS-rendered dropdown menus.
+   On Windows/Chromium the <select> popup can render with a light background.
+   Ensure options have a high-contrast palette. */
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #0b1220;
+  color: #e9edf7;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.subtle a:hover,
+a:hover {
+  color: var(--accent);
+}
+
+::selection {
+  background: rgba(246, 195, 68, 0.35);
+  color: var(--text);
+}
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  backdrop-filter: blur(8px);
+}
+
+.heading {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.subtle {
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 14px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pill.info {
+  background: rgba(62, 168, 255, 0.12);
+  color: #9bd4ff;
+}
+
+.pill.success {
+  background: rgba(32, 201, 151, 0.12);
+  color: #7be2c4;
+}
+
+.pill.warning {
+  background: rgba(240, 173, 78, 0.12);
+  color: #f7d7a6;
+}
+
+.pill.error {
+  background: rgba(242, 95, 92, 0.12);
+  color: #ffb6b3;
+}

@@ -13,17 +13,20 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-def _env_file_path() -> Path:
+def _env_file_path() -> Path | None:
+    """Return repo-root .env.<RB_ENV> if it exists.
+
+    In production/container deployments, environment variables are commonly injected at runtime
+    and no repo-root env file is present. In that case, return None and let BaseSettings read
+    directly from the process environment.
+    """
+
     rb_env = os.getenv("RB_ENV", "dev").strip() or "dev"
     candidate = _repo_root() / f".env.{rb_env}"
     if candidate.exists():
         return candidate
 
-    # Fail fast: sovereign systems do not silently mix environments.
-    raise FileNotFoundError(
-        f"Environment file not found: {candidate}. "
-        "Set RB_ENV=dev or RB_ENV=staging and ensure .env.<env> exists at repo root."
-    )
+    return None
 
 
 class Settings(BaseSettings):
@@ -49,6 +52,18 @@ class Settings(BaseSettings):
         default=None, validation_alias="BOOTSTRAP_ADMIN_PASSWORD"
     )
 
+    openai_api_key: str | None = Field(
+        default=None, validation_alias="OPENAI_API_KEY"
+    )
+
+    # EVM anchoring (real on-chain transactions)
+    evm_rpc_url: str | None = Field(default=None, validation_alias="EVM_RPC_URL")
+    evm_chain_id: int | None = Field(default=None, validation_alias="EVM_CHAIN_ID")
+    evm_private_key: str | None = Field(default=None, validation_alias="EVM_PRIVATE_KEY")
+    evm_explorer_tx_url_base: str | None = Field(
+        default=None, validation_alias="EVM_EXPLORER_TX_URL_BASE"
+    )
+
     # `enable_decoding=False` ensures list fields can be supplied as comma-separated strings
     # (rather than requiring JSON arrays) and validated deterministically.
     model_config = SettingsConfigDict(
@@ -72,4 +87,6 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     env_file = _env_file_path()
-    return Settings(_env_file=env_file)
+    if env_file is not None:
+        return Settings(_env_file=env_file)
+    return Settings()
